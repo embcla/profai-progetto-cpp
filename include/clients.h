@@ -3,11 +3,11 @@
 
 #include <string>
 #include <list>
-#include <algorithm>
 
 class cliente {
 public:
     cliente(std::string nome, std::string cognome);
+    cliente(std::string nome, std::string cognome, int index);
 
     std::string toStr();
     std::string getNome();
@@ -17,8 +17,14 @@ public:
     bool operator<(const cliente& other) const;
 
 private:
+    void setId(int val);
+    int getId();
     std::string _nome;
     std::string _cognome;
+    int _id;
+
+friend class clienti;
+
 };
 
 
@@ -42,6 +48,7 @@ private:
     std::list<cliente>::iterator _fineLista;
     std::list<cliente>::iterator _inizioLista;
     std::string toLower (std::string val);
+    int _lastIndex = 0;
 };
 
 #endif // CLIENTS_H

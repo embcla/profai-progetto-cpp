@@ -1,4 +1,5 @@
 #include "../include/clients.h"
+
 #include <algorithm>
 
 using namespace std::literals;
@@ -7,10 +8,17 @@ using namespace std::literals;
 cliente::cliente(std::string nome, std::string cognome) {
     _nome = nome;
     _cognome = cognome;
+    _id = 0;
+}
+
+cliente::cliente(std::string nome, std::string cognome, int index) {
+    _nome = nome;
+    _cognome = cognome;
+    _id = index;
 }
 
 std::string cliente::toStr() {
-    std::string val = _nome + " " + _cognome;
+    std::string val = _nome + " " + _cognome + " ";
     return val;
 }
 
@@ -32,6 +40,13 @@ bool cliente::operator<(const cliente& other) const {
     return _nome < other._nome;
 }
 
+void cliente::setId(int val) {
+    _id = val;
+}
+
+int cliente::getId() {
+    return _id;
+}
 
 // Clienti class implementation
 clienti::clienti() {
@@ -39,6 +54,8 @@ clienti::clienti() {
 }
 
 void clienti::aggiungiCliente(cliente clnt) {
+    clnt.setId(_lastIndex);
+    _lastIndex++;
     _lista_clienti.push_back(clnt);
     _lista_clienti.sort();
     _fineLista = _lista_clienti.end();
