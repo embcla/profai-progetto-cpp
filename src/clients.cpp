@@ -1,4 +1,4 @@
-#include "../include/clients.h"
+#include "clients.h"
 
 #include <algorithm>
 
@@ -18,8 +18,7 @@ cliente::cliente(std::string nome, std::string cognome, int index) {
 }
 
 std::string cliente::toStr() {
-    std::string val = _nome + " " + _cognome + " ";
-    return val;
+    return _nome + " " + _cognome + " ";
 }
 
 std::string cliente::getNome() {
