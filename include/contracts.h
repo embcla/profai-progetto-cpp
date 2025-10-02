@@ -5,7 +5,9 @@
 #include <list>
 #include <string>
 
-class contratto {
+#include "items.h"
+
+class contratto : public Item {
 public:
     contratto();
     contratto(std::chrono::system_clock::time_point being, std::chrono::system_clock::time_point end, int clientIndex);
@@ -21,7 +23,7 @@ private:
     std::string _note;
 };
 
-class contratti {
+class contratti : public ItemList<contratto> {
 public:
     contratti();
 

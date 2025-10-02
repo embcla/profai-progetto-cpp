@@ -7,13 +7,12 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
                 "-o",
-                "${workspaceFolder}/build/${fileBasenameNoExtension}",
+                "${workspaceFolder}/build/app",
                 "-Wall",
                 "-Wextra",
                 "-I${workspaceFolder}/include",
-                "${workspaceFolder}/src/clients.cpp"
+                "${workspaceFolder}/src/*.cpp"
             ],
             "options": {
                 "cwd": "${fileDirname}"

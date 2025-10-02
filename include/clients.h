@@ -17,6 +17,8 @@ public:
 
     bool operator==(const Item& other) const override;
     bool operator<(const Item& other) const override;
+    bool operator==(const cliente& other) const;
+    bool operator<(const cliente& other) const;
 
 private:
     std::string _nome;
@@ -33,7 +35,7 @@ public:
     // void aggiungiCliente(cliente clnt);
     // void modificaCliente(cliente oldClnt, cliente newClnt);
     // void eliminaCliente(cliente clnt);
-    cliente cercaCliente(std::string val);
+    cliente* search(std::string val);
     // int dimensione();
     // std::list<cliente>::iterator begin() { return _lista_clienti.begin(); }
     // std::list<cliente>::iterator end() { return _lista_clienti.end(); }

@@ -17,20 +17,27 @@ cliente::cliente(std::string nome, std::string cognome, int index) {
     _id = index;
 }
 
-std::string cliente::toStr() {
+std::string cliente::toStr() const {
     return _nome + " " + _cognome + " ";
 }
 
-std::string cliente::getNome() {
+std::string cliente::getNome() const {
     return _nome;
 }
 
-std::string cliente::getCognome() {
+std::string cliente::getCognome() const {
     return _cognome;
 }
 
 bool cliente::operator==(const cliente& other) const {
     return _nome == other._nome && _cognome == other._cognome;
+}
+
+bool cliente::operator==(const Item& other) const {
+    const cliente* c = dynamic_cast<const cliente*>(&other);
+    if (!c) return false;
+    return this == c;
+    // return _nome == c->_nome && _cognome == c->_cognome;
 }
 
 bool cliente::operator<(const cliente& other) const {
@@ -39,50 +46,24 @@ bool cliente::operator<(const cliente& other) const {
     return _nome < other._nome;
 }
 
-void cliente::setId(int val) {
-    _id = val;
+bool cliente::operator<(const Item& other) const {
+    const cliente* c = dynamic_cast<const cliente*>(&other);
+    if (!c) return false; // or throw
+    return this < c;
+    // if (_cognome != c->_cognome)
+    //     return _cognome < c->_cognome;
+    // return _nome < c->_nome;
 }
 
-int cliente::getId() {
-    return _id;
-}
-
-// Clienti class implementation
-clienti::clienti() {
-
-}
-
-void clienti::aggiungiCliente(cliente clnt) {
-    clnt.setId(_lastIndex);
-    _lastIndex++;
-    _lista_clienti.push_back(clnt);
-    _lista_clienti.sort();
-    _fineLista = _lista_clienti.end();
-    _inizioLista = _lista_clienti.begin();
-}
-
-void clienti::modificaCliente(cliente oldClnt, cliente newClnt) {
-    eliminaCliente(oldClnt);
-    aggiungiCliente(newClnt);
-}
-
-void clienti::eliminaCliente(cliente clnt) {
-    _lista_clienti.remove(clnt);
-}
-
-cliente clienti::cercaCliente(std::string val) {
+cliente* clienti::search(std::string val) {
     std::string val_lower = toLower(val);
-    auto it = std::find_if(_inizioLista, _fineLista, [this, &val_lower](cliente& c) {
+    auto it = std::find_if(this->begin(), this->end(), [this, &val_lower](cliente& c) {
         return (toLower(c.getNome()).find(val_lower) != std::string::npos || toLower(c.getCognome()).find(val_lower) != std::string::npos);
     });
-    if (it != _fineLista)
-        return *it;
+    if (it != this->end())
+        return &(*it);
     else
-        return notFound;
-}
-
-int clienti::dimensione() {
-    return _lista_clienti.size();
+        return nullptr;
 }
 
 std::string clienti::toLower (std::string str) {

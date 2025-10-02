@@ -27,14 +27,14 @@ protected:
 public:
     void add(T item);
     void remove(int id);
-    void remove(Item obj);
+    void remove(const Item& obj);
     T* search(int id);
-    T* ItemList<T>::search(Item obj);
+    T* search(const Item& obj);
     int size();
-    std::list<T>::iterator begin() { return _items.begin(); }
-    std::list<T>::iterator end() { return _items.end(); }
-    std::list<T>::const_iterator begin() const { return _items.begin(); }
-    std::list<T>::const_iterator end() const { return _items.end(); }
+    typename std::list<T>::iterator begin() { return _items.begin(); }
+    typename std::list<T>::iterator end() { return _items.end(); }
+    typename std::list<T>::const_iterator begin() const { return _items.begin(); }
+    typename std::list<T>::const_iterator end() const { return _items.end(); }
 };
 
 // Template implementations must be in header file
@@ -54,7 +54,7 @@ void ItemList<T>::remove(int id) {
 }
 
 template<typename T>
-void ItemList<T>::remove(Item obj) {
+void ItemList<T>::remove(const Item& obj) {
     _items.remove_if([obj](const T& item) {
         return item == obj;
     });
@@ -73,7 +73,7 @@ T* ItemList<T>::search(int id) {
 }
 
 template<typename T>
-T* ItemList<T>::search(Item obj) {
+T* ItemList<T>::search(const Item& obj) {
     auto it = std::find_if(_items.begin(), _items.end(), [obj](const T& item) {
         return item == obj;
     });
