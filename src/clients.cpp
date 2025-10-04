@@ -29,6 +29,14 @@ std::string cliente::getCognome() const {
     return _cognome;
 }
 
+std::string cliente::setNome(std::string val) {
+    _nome = val;
+}
+
+std::string cliente::setCognome(std::string val) {
+    _cognome = val;
+}
+
 bool cliente::operator==(const cliente& other) const {
     return _nome == other._nome && _cognome == other._cognome;
 }

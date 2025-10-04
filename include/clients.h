@@ -14,6 +14,8 @@ public:
     std::string toStr() const override;
     std::string getNome() const;
     std::string getCognome() const;
+    std::string setNome(std::string val);
+    std::string setCognome(std::string val);
 
     bool operator==(const Item& other) const override;
     bool operator<(const Item& other) const override;

@@ -1,8 +1,9 @@
-#include "../include/cli.h"
 #include <iostream>
 #include <string>
 #include <csignal>
 #include <cstdlib>
+
+#include "cli.h"
 
 // Signal handler for SIGINT (Ctrl+C) and SIGTSTP (Ctrl+Z)
 void signalHandler(int signal) {
@@ -17,12 +18,63 @@ void signalHandler(int signal) {
     }
 }
 
-CLI::CLI() {
+CLI::CLI(const CLICallbacks& callbacks) {
     // manager = clientsManager();  // To be implemented
 
     // Register signal handlers
     std::signal(SIGINT, signalHandler);   // Ctrl+C
     std::signal(SIGTSTP, signalHandler);  // Ctrl+Z
+
+    // Validate that all required callbacks are provided
+    if (!callbacks.clientAdd) {
+        throw std::invalid_argument("clientAdd callback is required");
+    }
+    if (!callbacks.clientMod) {
+        throw std::invalid_argument("clientMod callback is required");
+    }
+    if (!callbacks.clientDel) {
+        throw std::invalid_argument("clientDel callback is required");
+    }
+    if (!callbacks.clientSearch) {
+        throw std::invalid_argument("clientSearch callback is required");
+    }
+    if (!callbacks.clientViewAll) {
+        throw std::invalid_argument("clientViewAll callback is required");
+    }
+    if (!callbacks.appointmentAdd) {
+        throw std::invalid_argument("appointmentAdd callback is required");
+    }
+    if (!callbacks.appointmentDel) {
+        throw std::invalid_argument("appointmentDel callback is required");
+    }
+    if (!callbacks.appointmentSearch) {
+        throw std::invalid_argument("appointmentSearch callback is required");
+    }
+    if (!callbacks.appointmentShow) {
+        throw std::invalid_argument("appointmentShow callback is required");
+    }    
+    if (!callbacks.appointmentSearch) {
+        throw std::invalid_argument("appointmentSearch callback is required");
+    }
+    if (!callbacks.contractAdd) {
+        throw std::invalid_argument("contractAdd callback is required");
+    }
+    if (!callbacks.contractDel) {
+        throw std::invalid_argument("contractDel callback is required");
+    }
+    if (!callbacks.contractSearch) {
+        throw std::invalid_argument("contractSearch callback is required");
+    }
+    if (!callbacks.contractShow) {
+        throw std::invalid_argument("contractShow callback is required");
+    }    
+    if (!callbacks.contractSearch) {
+        throw std::invalid_argument("contractSearch callback is required");
+    }
+
+    // If all valid, store them
+    _callbacks = callbacks;
+
 }
 
 void CLI::run() {
@@ -91,14 +143,12 @@ void CLI::addClient() {
         return;
     }
 
-    // cliente newClient(nome, cognome);
-    // if (manager.addClient(newClient)) {
-    //     std::cout << "Client added successfully!" << std::endl;
-    // } else {
-    //     std::cout << "Failed to add client." << std::endl;
-    // }
+    if(_callbacks.clientAdd(nome, cognome) == false) {
+        std::cout << "\tFailed to add client." << std::endl;
+    } else {
+        std::cout << "\tClient added successfully!" << std::endl;
+    }
 
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
 }
 
 void CLI::modifyClient() {
@@ -113,30 +163,31 @@ void CLI::modifyClient() {
         return;
     }
 
-    // cliente client = manager.searchClient(searchTerm);
-    // if (client not found) {
-    //     std::cout << "Client not found." << std::endl;
-    //     return;
-    // }
+    std::string ret = _callbacks.clientSearch(searchTerm);
+    if(ret.empty()) {
+        std::cout << "\tClient not found." << std::endl;
+        return;
+    } else {
 
-    // std::cout << "\nCurrent client details:" << std::endl;
-    // std::cout << client.toStr() << std::endl;
-    // std::cout << "\nEnter new values (press Enter to keep current value):" << std::endl;
+    }
+    
+
+    std::cout << "\nCurrent client details:" << std::endl;
+    std::cout << ret << std::endl;
+    std::cout << "\nEnter new values (press Enter to keep current value):" << std::endl;
 
     // Get new values and update
-    // std::string nome, cognome;
-    // std::cout << "Nome [current]: ";
-    // std::getline(std::cin, nome);
-    // std::cout << "Cognome [current]: ";
-    // std::getline(std::cin, cognome);
-
-    // if (manager.modifyClient(oldClient, newClient)) {
-    //     std::cout << "Client updated successfully!" << std::endl;
-    // } else {
-    //     std::cout << "Failed to update client." << std::endl;
-    // }
-
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+    std::string nome, cognome;
+    std::cout << "Nome [current]: ";
+    std::getline(std::cin, nome);
+    std::cout << "Cognome [current]: ";
+    std::getline(std::cin, cognome);
+    
+    if (_callbacks.clientMod(searchTerm, nome, cognome)) {
+        std::cout << "\tClient updated successfully!" << std::endl;
+    } else {
+        std::cout << "\tFailed to update client." << std::endl;
+    }
 }
 
 void CLI::removeClient() {
@@ -151,30 +202,28 @@ void CLI::removeClient() {
         return;
     }
 
-    // cliente client = manager.searchClient(searchTerm);
-    // if (client not found) {
-    //     std::cout << "Client not found." << std::endl;
-    //     return;
-    // }
+    std::string ret = _callbacks.clientSearch(searchTerm);
+    if(ret.empty()) {
+        std::cout << "\tClient not found." << std::endl;
+        return;
+    }
 
-    // std::cout << "\nClient to delete:" << std::endl;
-    // std::cout << client.toStr() << std::endl;
+    std::cout << "\nClient to delete:" << std::endl;
+    std::cout << ret << std::endl;
 
-    // std::string confirm;
-    // std::cout << "\nAre you sure you want to delete this client? (y/N): ";
-    // std::getline(std::cin, confirm);
+    std::string confirm;
+    std::cout << "\nAre you sure you want to delete this client? (y/N): ";
+    std::getline(std::cin, confirm);
 
-    // if (confirm == "y" || confirm == "Y" || confirm == "yes" || confirm == "Yes") {
-    //     if (manager.removeClient(client)) {
-    //         std::cout << "Client deleted successfully!" << std::endl;
-    //     } else {
-    //         std::cout << "Failed to delete client." << std::endl;
-    //     }
-    // } else {
-    //     std::cout << "Deletion cancelled." << std::endl;
-    // }
-
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+    if (confirm == "y" || confirm == "Y" || confirm == "yes" || confirm == "Yes") {
+        if (_callbacks.clientDel(searchTerm)) {
+            std::cout << "Client deleted successfully!" << std::endl;
+        } else {
+            std::cout << "Failed to delete client." << std::endl;
+        }
+    } else {
+        std::cout << "Deletion cancelled." << std::endl;
+    }
 }
 
 void CLI::searchClient() {
@@ -189,40 +238,25 @@ void CLI::searchClient() {
         return;
     }
 
-    // std::vector<cliente> results = manager.searchClients(query);
-
-    // if (results.empty()) {
-    //     std::cout << "No clients found." << std::endl;
-    //     return;
-    // }
-
-    // std::cout << "\nFound " << results.size() << " client(s):" << std::endl;
-    // int index = 0;
-    // for (const auto& client : results) {
-    //     std::cout << "\n" << index++ << ". " << client.toStr() << std::endl;
-    //     std::cout << "--------------------" << std::endl;
-    // }
-
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+    std::string ret = _callbacks.clientSearch(query);
+    if(ret.empty()) {
+        std::cout << "\tClient not found." << std::endl;
+        return;
+    } else {
+        std::cout << ret << std::endl;
+        std::cout << "--------------------" << std::endl;
+    }
+    
 }
 
 void CLI::viewAllClients() {
     std::cout << "\n--- All Clients ---" << std::endl;
 
-    // std::vector<cliente> clients = manager.getAllClients();
-
-    // if (clients.empty()) {
-    //     std::cout << "No clients found." << std::endl;
-    //     return;
-    // }
-
-    // int index = 0;
-    // for (const auto& client : clients) {
-    //     std::cout << "\n" << index++ << ". " << client.toStr() << std::endl;
-    //     std::cout << "--------------------" << std::endl;
-    // }
-
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+    std::vector<std::string> ret = _callbacks.clientViewAll();
+    for (auto str : ret) {
+        std::cout << str << std::endl;
+    }
+    std::cout << "--------------------" << std::endl << std::endl;
 }
 
 void CLI::selectClient() {
@@ -343,4 +377,13 @@ void CLI::searchContracts() {
     std::cout << "\n--- Search Contracts ---" << std::endl;
     // Implementation for searching contracts
     std::cout << "TO BE IMPLEMENTED" << std::endl;
+}
+
+bool CLI::checkClientExists(std::string query) {
+    std::string ret = _callbacks.clientSearch(query);
+    if(ret.empty()) {
+        std::cout << "\tClient not found." << std::endl;
+        return false;
+    }
+    return true;
 }
