@@ -5,6 +5,10 @@
 
 #include "cli.h"
 
+#include "appointments.h"
+#include "clients.h"
+#include "contracts.h"
+
 // Signal handler for SIGINT (Ctrl+C) and SIGTSTP (Ctrl+Z)
 void signalHandler(int signal) {
     if (signal == SIGINT) {
@@ -77,6 +81,16 @@ CLI::CLI(const CLICallbacks& callbacks) {
 
 }
 
+CLI::CLI(const appuntamenti& apps, const clienti& clnts, const contratti& cntrs) {
+    std::signal(SIGINT, signalHandler);   // Ctrl+C
+    std::signal(SIGTSTP, signalHandler);  // Ctrl+Z
+
+    _appointments = apps;
+    _clients = clnts;
+    _contracts = cntrs;
+
+}
+
 void CLI::run() {
     std::cout << "=== InsuraPro Solutions CRM ===" << std::endl;
     std::cout << "Welcome to your client management system!" << std::endl;
@@ -143,7 +157,7 @@ void CLI::addClient() {
         return;
     }
 
-    if(_callbacks.clientAdd(nome, cognome) == false) {
+    if(_clients.add(nome, cognome) == false) {
         std::cout << "\tFailed to add client." << std::endl;
     } else {
         std::cout << "\tClient added successfully!" << std::endl;
@@ -163,7 +177,7 @@ void CLI::modifyClient() {
         return;
     }
 
-    std::string ret = _callbacks.clientSearch(searchTerm);
+    std::string ret = _clients.searchToString(searchTerm);
     if(ret.empty()) {
         std::cout << "\tClient not found." << std::endl;
         return;
@@ -183,7 +197,7 @@ void CLI::modifyClient() {
     std::cout << "Cognome [current]: ";
     std::getline(std::cin, cognome);
     
-    if (_callbacks.clientMod(searchTerm, nome, cognome)) {
+    if (_clients.modify(_clients.search(searchTerm), nome, cognome)) {
         std::cout << "\tClient updated successfully!" << std::endl;
     } else {
         std::cout << "\tFailed to update client." << std::endl;
@@ -202,25 +216,22 @@ void CLI::removeClient() {
         return;
     }
 
-    std::string ret = _callbacks.clientSearch(searchTerm);
-    if(ret.empty()) {
+    cliente* toDelete = _clients.search(searchTerm);
+    if (!toDelete) {
         std::cout << "\tClient not found." << std::endl;
         return;
     }
 
     std::cout << "\nClient to delete:" << std::endl;
-    std::cout << ret << std::endl;
+    std::cout << toDelete->toStr() << std::endl;
 
     std::string confirm;
     std::cout << "\nAre you sure you want to delete this client? (y/N): ";
     std::getline(std::cin, confirm);
 
     if (confirm == "y" || confirm == "Y" || confirm == "yes" || confirm == "Yes") {
-        if (_callbacks.clientDel(searchTerm)) {
-            std::cout << "Client deleted successfully!" << std::endl;
-        } else {
-            std::cout << "Failed to delete client." << std::endl;
-        }
+        _clients.remove(*toDelete);
+        std::cout << "Client deleted successfully!" << std::endl;
     } else {
         std::cout << "Deletion cancelled." << std::endl;
     }
@@ -238,7 +249,7 @@ void CLI::searchClient() {
         return;
     }
 
-    std::string ret = _callbacks.clientSearch(query);
+    std::string ret = _clients.searchToString(query);
     if(ret.empty()) {
         std::cout << "\tClient not found." << std::endl;
         return;
@@ -252,9 +263,8 @@ void CLI::searchClient() {
 void CLI::viewAllClients() {
     std::cout << "\n--- All Clients ---" << std::endl;
 
-    std::vector<std::string> ret = _callbacks.clientViewAll();
-    for (auto str : ret) {
-        std::cout << str << std::endl;
+    for(auto elem : _clients) {
+        std::cout << "[" << elem.getId() << "]: " << elem.toStr() << std::endl;
     }
     std::cout << "--------------------" << std::endl << std::endl;
 }
@@ -380,7 +390,7 @@ void CLI::searchContracts() {
 }
 
 bool CLI::checkClientExists(std::string query) {
-    std::string ret = _callbacks.clientSearch(query);
+    std::string ret = _clients.searchToString(query);
     if(ret.empty()) {
         std::cout << "\tClient not found." << std::endl;
         return false;

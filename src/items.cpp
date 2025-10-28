@@ -16,3 +16,11 @@ Item::Item() : _id(0) {
 // template class ItemList<cliente>;
 // template class ItemList<contract>;
 // template class ItemList<appointment>;
+
+bool Item::operator==(const Item& other) const {
+    return (other.getId() == _id);
+}
+
+bool Item::operator<(const Item& other) const {
+    return _id < other.getId();
+}

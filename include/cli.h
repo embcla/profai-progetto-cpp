@@ -5,7 +5,10 @@
 #include <functional>
 #include <string>
 #include <vector>
+
+#include "appointments.h"
 #include "clients.h"
+#include "contracts.h"
 
 // #include "clients-manager.h"  // To be implemented
 
@@ -41,6 +44,7 @@ struct CLICallbacks {
 class CLI {
 public:
     CLI() = delete;
+    CLI(const appuntamenti& apps, const clienti& clnts, const contratti& cntrs);
     CLI(const CLICallbacks& callbacks);
     void run();
 
@@ -70,6 +74,11 @@ private:
     void searchContracts();
 
     bool checkClientExists(std::string query);
+
+    appuntamenti _appointments;
+    clienti _clients;
+    contratti _contracts;
+
 };
 
 #endif // CLI_H

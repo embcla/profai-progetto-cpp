@@ -1,5 +1,5 @@
-#ifndef APPOINTMENTS_H
-#define APPOINTMENTS_H
+#ifndef CONTRACTS_H
+#define CONTRACTS_H
 
 #include <chrono>
 #include <list>
@@ -9,10 +9,13 @@
 
 class contratto : public Item {
 public:
-    contratto();
-    contratto(std::chrono::system_clock::time_point being, std::chrono::system_clock::time_point end, int clientIndex);
-    contratto(std::chrono::system_clock::time_point being, std::chrono::system_clock::time_point end, int clientIndex, std::string note);
+    contratto() = delete;
+    contratto(std::chrono::system_clock::time_point begin, std::chrono::system_clock::time_point end, int clientIndex);
+    contratto(std::chrono::system_clock::time_point begin, std::chrono::system_clock::time_point end, int clientIndex, std::string note);
 
+    std::string toStr() const override;
+    // bool operator==(const Item& other) const override;
+    // bool operator<(const Item& other) const override;
     bool operator==(const contratto& other) const;
     bool operator<(const contratto& other) const;
 
@@ -25,16 +28,16 @@ private:
 
 class contratti : public ItemList<contratto> {
 public:
-    contratti();
+    // contratti();
 
     void aggiungiContratto(contratto elem);
     void rimuoviContratto(contratto elem);
-    std::list<contratto> cercaContrattoInizio(std::chrono::system_clock::time_point timeDate);
-    std::list<contratto> cercaContrattoFine(std::chrono::system_clock::time_point timeDate);
-    std::list<contratto> cercaContrattoCliente(int clientIndex); 
+    contratto cercaContrattoInizio(std::chrono::system_clock::time_point timeDate);
+    contratto cercaContrattoFine(std::chrono::system_clock::time_point timeDate);
+    contratto cercaContrattoCliente(int clientIndex); 
 
 private:
-    std::list<contratto> _lista_appuntamenti;
+    ItemList<contratto> _lista_contratti;
 };
 
-#endif // APPOINTMENTS_H
+#endif // CONTRACTS_H

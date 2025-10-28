@@ -15,8 +15,8 @@ public:
     int getId() const { return _id; }
     void setId(int val) { _id = val; }
     virtual std::string toStr() const = 0;  // Pure virtual
-    virtual bool operator==(const Item& other) const = 0; // Pure virtual
-    virtual bool operator<(const Item& other) const = 0; // Pure virtual
+    bool operator==(const Item& other) const; // Pure virtual
+    bool operator<(const Item& other) const; // Pure virtual
 };
 
 template<typename T>
@@ -27,9 +27,9 @@ protected:
 public:
     void add(T item);
     void remove(int id);
-    void remove(const Item& obj);
+    void remove(const T& obj);
     T* search(int id);
-    T* search(const Item& obj);
+    T* search(const T& obj);
     int size();
     typename std::list<T>::iterator begin() { return _items.begin(); }
     typename std::list<T>::iterator end() { return _items.end(); }
@@ -54,8 +54,8 @@ void ItemList<T>::remove(int id) {
 }
 
 template<typename T>
-void ItemList<T>::remove(const Item& obj) {
-    _items.remove_if([obj](const T& item) {
+void ItemList<T>::remove(const T& obj) {
+    _items.remove_if([&obj](const T& item) {
         return item == obj;
     });
 }
@@ -73,7 +73,7 @@ T* ItemList<T>::search(int id) {
 }
 
 template<typename T>
-T* ItemList<T>::search(const Item& obj) {
+T* ItemList<T>::search(const T& obj) {
     auto it = std::find_if(_items.begin(), _items.end(), [obj](const T& item) {
         return item == obj;
     });
