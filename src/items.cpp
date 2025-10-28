@@ -13,7 +13,7 @@ Item::Item() : _id(0) {
 // explicitly instantiate them here instead.
 
 // Example explicit template instantiations (uncomment if needed):
-// template class ItemList<cliente>;
+// template class ItemList<client>;
 // template class ItemList<contract>;
 // template class ItemList<appointment>;
 

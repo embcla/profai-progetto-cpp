@@ -1,9 +1,11 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
-#include <string>
-#include <list>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <list>
+#include <string>
 
 class Item {
 protected:
@@ -22,8 +24,21 @@ public:
 template<typename T>
 class ItemList {
 protected:
+    explicit ItemList(std::string filename) : _filename(std::move(filename)) {};
+    std::string _filename;
     std::list<T> _items;
     int _nextId = 1;
+    // Pure virtual methods for subclasses to implement
+    virtual std::string itemToCSVLine(const T& item) const = 0;
+    virtual T csvLineToItem(const std::string& line) const = 0;
+    static bool fileExists(const std::string& filename) {
+       return std::filesystem::exists(filename);
+    }
+
+    void persist() {
+        writeToCSV(_filename);
+    }
+
 public:
     void add(T item);
     void remove(int id);
@@ -35,6 +50,24 @@ public:
     typename std::list<T>::iterator end() { return _items.end(); }
     typename std::list<T>::const_iterator begin() const { return _items.begin(); }
     typename std::list<T>::const_iterator end() const { return _items.end(); }
+    // Generic CSV write - implemented once in ItemList
+    void writeToCSV(const std::string& filename) const {
+        std::ofstream file(filename);
+        for (const auto& item : _items) {
+            file << itemToCSVLine(item) << "\n";
+        }
+    }
+    
+    // Generic CSV read - implemented once in ItemList
+    void readFromCSV(const std::string& filename) {
+        if(!fileExists(filename))
+            return;
+        std::ifstream file(filename);
+        std::string line;
+        while (std::getline(file, line)) {
+            _items.push_back(csvLineToItem(line));
+        }
+    }
 };
 
 // Template implementations must be in header file
@@ -44,6 +77,7 @@ void ItemList<T>::add(T item) {
     _nextId++;
     _items.push_back(item);
     _items.sort();
+    persist();
 }
 
 template<typename T>
@@ -51,6 +85,7 @@ void ItemList<T>::remove(int id) {
     _items.remove_if([id](const T& item) {
         return item.getId() == id;
     });
+    persist();
 }
 
 template<typename T>
@@ -58,6 +93,7 @@ void ItemList<T>::remove(const T& obj) {
     _items.remove_if([&obj](const T& item) {
         return item == obj;
     });
+    persist();
 }
 
 template<typename T>

@@ -7,37 +7,45 @@
 
 #include "items.h"
 
-class contratto : public Item {
+class contract : public Item {
 public:
-    contratto() = delete;
-    contratto(std::chrono::system_clock::time_point begin, std::chrono::system_clock::time_point end, int clientIndex);
-    contratto(std::chrono::system_clock::time_point begin, std::chrono::system_clock::time_point end, int clientIndex, std::string note);
+    // contract() = delete;
+    contract(std::chrono::system_clock::time_point being, std::chrono::system_clock::time_point end, int clientIndex);
+    contract(std::chrono::system_clock::time_point being, std::chrono::system_clock::time_point end, int clientIndex, std::string note);
 
     std::string toStr() const override;
-    // bool operator==(const Item& other) const override;
-    // bool operator<(const Item& other) const override;
-    bool operator==(const contratto& other) const;
-    bool operator<(const contratto& other) const;
+    bool operator==(const contract& other) const;
+    bool operator<(const contract& other) const;
 
 private:
     std::chrono::system_clock::time_point _begin;
     std::chrono::system_clock::time_point _end;
     int _clientIndex;
     std::string _note;
+
+friend class contractList;
 };
 
-class contratti : public ItemList<contratto> {
+class contractList : public ItemList<contract> {
 public:
-    // contratti();
+    explicit contractList(std::string filename = "contracts.csv") : ItemList(std::move(filename)) {
+        if (!fileExists(_filename)) {
+            std::ofstream{_filename};
+        }
+        ItemList<contract>::readFromCSV(_filename);
+    }
 
-    void aggiungiContratto(contratto elem);
-    void rimuoviContratto(contratto elem);
-    contratto cercaContrattoInizio(std::chrono::system_clock::time_point timeDate);
-    contratto cercaContrattoFine(std::chrono::system_clock::time_point timeDate);
-    contratto cercaContrattoCliente(int clientIndex); 
+    void add(contract elem);
+    void add(std::chrono::system_clock::time_point begin,  std::chrono::system_clock::time_point end, int clientIndex, std::string note = "");
+    void remove(contract elem);
+    void remove(std::chrono::system_clock::time_point begin,  std::chrono::system_clock::time_point end,  int clientIndex);
+    std::list<contract> contractSearchFrom(std::chrono::system_clock::time_point timeDate);
+    std::list<contract> contractSearchTo(std::chrono::system_clock::time_point timeDate);
+    std::list<contract> contractSearchClient(int clientIndex);
 
 private:
-    ItemList<contratto> _lista_contratti;
+    std::string itemToCSVLine(const contract& item) const override;
+    contract csvLineToItem(const std::string& line) const override;
 };
 
 #endif // CONTRACTS_H
