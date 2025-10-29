@@ -2,6 +2,7 @@
 #include <string>
 #include <csignal>
 #include <cstdlib>
+#include <iterator>
 
 #include "cli.h"
 
@@ -176,23 +177,29 @@ void CLI::modifyClient() {
         std::cout << "Search term cannot be empty." << std::endl;
         return;
     }
-    std::list<client> clients = _clients.searchToItemList(searchTerm);
-    if (clients.empty()) {
-        std::cout << "\tClient not found." << std::endl;
-        return;
-    } 
-    
-    if (clients.size() != 1) {
-        std::cout << "\tMultiple clients found. Please refine your search." << std::endl;
-        narrowSearchClient(clients);
-    }
-    if (clients.empty()) {
-        std::cout << "\tNo client selected for modification." << std::endl;
-        return;
-    }
 
+    // std::list<client> clients = _clients.searchToItemList(searchTerm);
+    // if (clients.empty()) {
+    //     std::cout << "\tClient not found." << std::endl;
+    //     return;
+    // } 
+    
+    // if (clients.size() != 1) {
+    //     std::cout << "\tMultiple clients found. Please refine your search." << std::endl;
+    //     narrowSearchClient(clients);
+    // }
+    // if (clients.empty()) {
+    //     std::cout << "\tNo client selected for modification." << std::endl;
+    //     return;
+    // }
+    client* clnt = nullptr;
+    if (!findSingleClient(clnt, searchTerm)) {
+        std::cout << "No client selected, or client not found" << std::endl;
+        return;
+    }
+    
     std::cout << "\nCurrent client details:" << std::endl;
-    std::cout << clients.front().toStr() << std::endl;
+    std::cout << clnt->toStr() << std::endl;
     std::cout << "\nEnter new values (press Enter to keep current value):" << std::endl;
 
     // Get new values and update
@@ -202,7 +209,7 @@ void CLI::modifyClient() {
     std::cout << "Cognome [current]: ";
     std::getline(std::cin, cognome);
 
-    if (_clients.modify(clients.front(), nome, cognome)) {
+    if (_clients.modify(*clnt, nome, cognome)) {
         std::cout << "\tClient updated successfully!" << std::endl;
     } else {
         std::cout << "\tFailed to update client." << std::endl;
@@ -226,6 +233,7 @@ void CLI::removeClient() {
         std::cout << "\tClient not found." << std::endl;
         return;
     }
+
     if (clients.size() != 1) {
         narrowSearchClient(clients);
     }
@@ -247,6 +255,27 @@ void CLI::removeClient() {
     } else {
         std::cout << "Deletion cancelled." << std::endl;
     }
+}
+
+bool CLI::findSingleClient(client*& clnt, std::string searchTerm) {
+    std::list<client> clients = _clients.searchToItemList(searchTerm);
+    if (clients.empty()) {
+        std::cout << "\tClient not found." << std::endl;
+        return false;
+    }
+    
+    if (clients.size() != 1) {
+        narrowSearchClient(clients);
+    }
+
+    if (clients.empty()) {
+        std::cout << "\tNo client selected for deletion." << std::endl;
+        return false;
+    }
+
+    client& chosen = clients.front();
+    clnt = _clients.search(chosen.getId());
+    return clnt != nullptr;
 }
 
 void CLI::searchClient() {
@@ -319,6 +348,11 @@ void CLI::selectClient() {
         return;
     }
 
+    client* clnt;
+    if (!findSingleClient(clnt, searchTerm)) {
+        std::cout << "No client selected, or client not found" << std::endl;
+        return;
+    }
     // client client = manager.searchClient(searchTerm);
     // if (client not found) {
     //     std::cout << "Client not found." << std::endl;
@@ -328,23 +362,23 @@ void CLI::selectClient() {
     // std::cout << "Selected client: " << client.toStr() << std::endl;
     // showClientMenu(client.toStr());
 
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+    // std::cout << "TO BE IMPLEMENTED" << std::endl;
     // For demonstration, call submenu anyway
-    showClientMenu(searchTerm);
+    showClientMenu(*clnt);
 }
 
-void CLI::showClientMenu(const std::string& clientName) {
-    std::cout << "\n=== Client Submenu: " << clientName << " ===" << std::endl;
+void CLI::showClientMenu(const client clnt) {
+    std::cout << "\n=== Client Submenu: " << clnt.toStr() << " ===" << std::endl;
 
     while (true) {
         std::cout << "\n------------------------------" << std::endl;
         std::cout << "1. Show Appointments" << std::endl;
-        std::cout << "2. Show Contracts" << std::endl;
-        std::cout << "3. Add Appointment" << std::endl;
-        std::cout << "4. Add Contract" << std::endl;
-        std::cout << "5. Remove Appointment" << std::endl;
-        std::cout << "6. Remove Contract" << std::endl;
-        std::cout << "7. Search Appointments" << std::endl;
+        std::cout << "2. Add Appointment" << std::endl;
+        std::cout << "3. Remove Appointment" << std::endl;
+        std::cout << "4. Search Appointments" << std::endl;
+        std::cout << "5. Show Contracts" << std::endl;
+        std::cout << "6. Add Contract" << std::endl;
+        std::cout << "7. Remove Contract" << std::endl;
         std::cout << "8. Search Contracts" << std::endl;
         std::cout << "0. Back to Main Menu" << std::endl;
         std::cout << "------------------------------" << std::endl;
@@ -354,21 +388,21 @@ void CLI::showClientMenu(const std::string& clientName) {
         std::getline(std::cin, choice);
 
         if (choice == "1") {
-            showAppointments();
+            showAppointments(clnt);
         } else if (choice == "2") {
-            showContracts();
+            addAppointment(clnt);
         } else if (choice == "3") {
-            addAppointment();
+            removeAppointment(clnt);
         } else if (choice == "4") {
-            addContract();
+            searchAppointments(clnt);
         } else if (choice == "5") {
-            removeAppointment();
+            showContracts(clnt);
         } else if (choice == "6") {
-            removeContract();
+            addContract(clnt);
         } else if (choice == "7") {
-            searchAppointments();
+            removeContract(clnt);
         } else if (choice == "8") {
-            searchContracts();
+            searchContracts(clnt);
         } else if (choice == "0") {
             std::cout << "Returning to main menu..." << std::endl;
             break;
@@ -379,59 +413,113 @@ void CLI::showClientMenu(const std::string& clientName) {
 }
 
 // Client submenu functions
-void CLI::showAppointments() {
+void CLI::showAppointments(const client clnt) {
     std::cout << "\n--- Show Appointments ---" << std::endl;
-    // Implementation for showing appointments
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+    auto appts = _appointments.searchClient(clnt.getId());
+    printElemList(appts);
 }
 
-void CLI::showContracts() {
-    std::cout << "\n--- Show Contracts ---" << std::endl;
-    // Implementation for showing contracts
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
-}
 
-void CLI::addAppointment() {
+void CLI::addAppointment(const client clnt) {
+    std::string date, time, note;
     std::cout << "\n--- Add Appointment ---" << std::endl;
-    // Implementation for adding appointment
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+    std::cout << "  Enter appointment date: " << std::endl;
+    std::getline(std::cin, date);
+
+    std::cout << "  Enter appointment time: " << std::endl;
+    std::getline(std::cin, time);
+
+    std::cout << "  Enter note: " << std::endl;
+    std::getline(std::cin, note);
+
+    std::time_t asTimeT;
+    if(!validateTimeDateInput(date, time, asTimeT)) return;
+
+    _appointments.add(std::chrono::system_clock::from_time_t(asTimeT), clnt.getId(), note);
+    std::cout << "\tAppointment added successfully!" << std::endl;
 }
 
-void CLI::addContract() {
-    std::cout << "\n--- Add Contract ---" << std::endl;
-    // Implementation for adding contract
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
+void CLI::searchAppointments(const client clnt) {
+    std::cout << "\n--- Search Appointments ---" << std::endl;
+    std::cout << "  Enter 1 to search after a date |date-->" << std::endl;
+    std::cout << "  Enter 2 to search up to a date <--date|" << std::endl;
+    std::string input;
+    std::getline(std::cin, input);
+    int val = std::atoi(input.c_str());
+    if (( val != 1 ) && ( val != 2 )) {
+        std::cout << "  Option not recognized" << std::endl;
+        return;
+    }
+
+    std::cout << "  Enter date:" << std::endl;
+    std::string date;
+    std::getline(std::cin, date);
+
+    std::time_t asTimeT;
+    if(!validateTimeDateInput(date, "00:00:00", asTimeT)) return;
+
+    if ( val == 1 ) {
+        printElemList(_appointments.searchTo(std::chrono::system_clock::from_time_t(asTimeT), clnt.getId()));
+    } else if ( val == 2 ) {
+        printElemList(_appointments.searchFrom(std::chrono::system_clock::from_time_t(asTimeT), clnt.getId()));
+    }
+
 }
 
-void CLI::removeAppointment() {
+void CLI::removeAppointment(const client clnt) {
     std::cout << "\n--- Remove Appointment ---" << std::endl;
     // Implementation for removing appointment
     std::cout << "TO BE IMPLEMENTED" << std::endl;
 }
 
-void CLI::removeContract() {
+void CLI::showContracts(const client clnt) {
+    std::cout << "\n--- Show Contracts ---" << std::endl;
+    auto cntrts = _contracts.contractSearchClient(clnt.getId());
+    printElemList(cntrts);
+}
+
+void CLI::addContract(const client clnt) {
+    std::cout << "\n--- Add Contract ---" << std::endl;
+    // Implementation for adding contract
+    std::cout << "TO BE IMPLEMENTED" << std::endl;
+}
+
+void CLI::removeContract(const client clnt) {
     std::cout << "\n--- Remove Contract ---" << std::endl;
     // Implementation for removing contract
     std::cout << "TO BE IMPLEMENTED" << std::endl;
 }
 
-void CLI::searchAppointments() {
-    std::cout << "\n--- Search Appointments ---" << std::endl;
-    // Implementation for searching appointments
-    std::cout << "TO BE IMPLEMENTED" << std::endl;
-}
-
-void CLI::searchContracts() {
+void CLI::searchContracts(const client clnt) {
     std::cout << "\n--- Search Contracts ---" << std::endl;
     // Implementation for searching contracts
     std::cout << "TO BE IMPLEMENTED" << std::endl;
 }
 
-// bool CLI::checkClientExists(std::string query) {
-//     std::list<std::string> ret = _clients.searchToString(query);
-//     if(ret.empty()) {
-//         std::cout << "\tClient not found." << std::endl;
-//         return false;
-//     }
-//     return true;
-// }
+template<typename Container>
+void CLI::printElemList(const Container& elements) {
+    if (std::begin(elements) == std::end(elements)) {
+        std::cout << "  The list is empty" << std::endl;
+        return;
+    }
+    for (const auto& elem : elements) {
+        std::cout << "  " << elem.toStr() << std::endl;
+    }
+}
+
+bool CLI::validateTimeDateInput(std::string date, std::string time, std::time_t& asTimeT) {
+    auto tmResult = appointment::parseDateTime(date, time);
+    if (!tmResult) {
+        std::cout << "\tInvalid date or time. Expected formats YYYY-MM-DD HH:MM[:SS] or DD/MM/YYYY HH:MM[:SS]." << std::endl;
+        return false;
+    }
+
+    std::tm tmValue = *tmResult;
+    std::cout << "  Parsed date: " << std::put_time(&tmValue, "%Y-%m-%d %H:%M:%S") << std::endl;
+    asTimeT = std::mktime(&tmValue);
+    if (asTimeT == -1) {
+        std::cout << "\tFailed to convert the provided date and time." << std::endl;
+        return false;
+    }
+    return true;
+}

@@ -33,17 +33,21 @@ private:
     void selectClient();
 
     // Client submenu functions
-    void showClientMenu(const std::string& clientName);
-    void showAppointments();
-    void showContracts();
-    void addAppointment();
-    void addContract();
-    void removeAppointment();
-    void removeContract();
-    void searchAppointments();
-    void searchContracts();
+    void showClientMenu(const client clnt);
+    void showAppointments(const client clnt);
+    void showContracts(const client clnt);
+    void addAppointment(const client clnt);
+    void addContract(const client clnt);
+    void removeAppointment(const client clnt);
+    void removeContract(const client clnt);
+    void searchAppointments(const client clnt);
+    void searchContracts(const client clnt);
 
+    template<typename Container>
+    void printElemList(const Container& elements);
+    bool findSingleClient(client*& clnt, std::string searchTerm);
     void narrowSearchClient(std::list<client>& clients);
+    bool validateTimeDateInput(std::string date, std::string time, std::time_t& asTimeT);
 
     appointmentList _appointments;
     clientList _clients;

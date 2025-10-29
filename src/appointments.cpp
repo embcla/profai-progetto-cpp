@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <array>
 
 #include "appointments.h"
 
@@ -39,7 +40,7 @@ std::string appointment::time_point_to_string(const std::chrono::system_clock::t
 }
 
 std::string appointment::toStr() const {
-    std::string ret = "Date: " + time_point_to_string(_timeDate) + "\nClient ID: " + std::to_string(_clientIndex) + "\nNote: " + _note;
+    std::string ret = "Date: " + time_point_to_string(_timeDate) + "\tClient ID: " + std::to_string(_clientIndex) + "\tNote: " + _note;
     return ret;
 }
 
@@ -49,6 +50,92 @@ bool appointment::operator==(const appointment& other) const {
 
 bool appointment::operator<(const appointment& other) const {
     return (_timeDate < other._timeDate);
+}
+
+namespace {
+bool validateTm(const std::tm& tm) {
+    if (tm.tm_year < 0) return false;
+    if (tm.tm_mon < 0 || tm.tm_mon > 11) return false;
+    if (tm.tm_mday < 1 || tm.tm_mday > 31) return false;
+    if (tm.tm_hour < 0 || tm.tm_hour > 23) return false;
+    if (tm.tm_min < 0 || tm.tm_min > 59) return false;
+    if (tm.tm_sec < 0 || tm.tm_sec > 60) return false; // allow leap second
+    return true;
+}
+
+std::optional<std::tm> tryParseWithFormat(const std::string& input, const std::string& format) {
+    std::tm tm{};
+    std::istringstream iss(input);
+    iss >> std::ws;
+    iss >> std::get_time(&tm, format.c_str());
+    if (iss.fail() || !iss.eof()) {
+        return std::nullopt;
+    }
+    tm.tm_isdst = -1;
+    if (!validateTm(tm)) {
+        return std::nullopt;
+    }
+    return tm;
+}
+} // namespace
+
+std::optional<std::tm> appointment::parseDateTime(const std::string& dateTime) {
+    if (dateTime.empty()) {
+        return std::nullopt;
+    }
+
+    constexpr std::array<const char*, 4> formats = {
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%d/%m/%Y %H:%M:%S",
+        "%d/%m/%Y %H:%M"
+    };
+
+    for (const auto& fmt : formats) {
+        if (auto parsed = tryParseWithFormat(dateTime, fmt)) {
+            return parsed;
+        }
+    }
+
+    return std::nullopt;
+}
+
+std::optional<std::tm> appointment::parseDateTime(const std::string& date, const std::string& time) {
+    if (date.empty() || time.empty()) {
+        return std::nullopt;
+    }
+
+    constexpr std::array<const char*, 2> dateFormats = { "%Y-%m-%d", "%d/%m/%Y" };
+    constexpr std::array<const char*, 2> timeFormats = { "%H:%M:%S", "%H:%M" };
+
+    for (const auto& df : dateFormats) {
+        for (const auto& tf : timeFormats) {
+            std::tm tm{};
+
+            std::istringstream dateStream(date);
+            dateStream >> std::ws;
+            dateStream >> std::get_time(&tm, df);
+            if (dateStream.fail() || !validateTm(tm)) {
+                continue;
+            }
+
+            std::istringstream timeStream(time);
+            timeStream >> std::ws;
+            timeStream >> std::get_time(&tm, tf);
+            if (timeStream.fail()) {
+                continue;
+            }
+
+            if (!validateTm(tm)) {
+                continue;
+            }
+
+            tm.tm_isdst = -1;
+            return tm;
+        }
+    }
+
+    return std::nullopt;
 }
 
 std::string appointmentList::itemToCSVLine(const appointment& item) const {
@@ -109,20 +196,20 @@ void appointmentList::remove(std::chrono::system_clock::time_point timeDate, int
     }
 }
 
-std::list<appointment> appointmentList::searchFrom(std::chrono::system_clock::time_point timeDate) {
+std::list<appointment> appointmentList::searchFrom(std::chrono::system_clock::time_point timeDate, int clientId) {
     std::list<appointment> results;
     for (const auto& app : _items) {
-        if (app._timeDate >= timeDate) {
+        if (app._timeDate >= timeDate && app._clientIndex == clientId) {
             results.push_back(app);
         }
     }
     return results;
 }
 
-std::list<appointment> appointmentList::searchTo(std::chrono::system_clock::time_point timeDate) {
+std::list<appointment> appointmentList::searchTo(std::chrono::system_clock::time_point timeDate, int clientId) {
     std::list<appointment> results;
     for (const auto& app : _items) {
-        if (app._timeDate <= timeDate) {
+        if (app._timeDate <= timeDate && app._clientIndex == clientId) {
             results.push_back(app);
         }
     }

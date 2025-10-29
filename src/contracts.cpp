@@ -15,7 +15,7 @@ contract::contract(std::chrono::system_clock::time_point begin, std::chrono::sys
 }
 
 std::string contract::toStr() const {
-    std::string ret = "Begin: " + std::to_string(std::chrono::system_clock::to_time_t(_begin)) + "\nEnd: " + std::to_string(std::chrono::system_clock::to_time_t(_end)) + "\nClient ID: " + std::to_string(_clientIndex) + "\nNote: " + _note;
+    std::string ret = "Begin: " + std::to_string(std::chrono::system_clock::to_time_t(_begin)) + "\tEnd: " + std::to_string(std::chrono::system_clock::to_time_t(_end)) + "\tClient ID: " + std::to_string(_clientIndex) + "\tNote: " + _note;
     return ret;
 }
 

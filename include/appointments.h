@@ -2,7 +2,9 @@
 #define appointments_H
 
 #include <chrono>
+#include <ctime>
 #include <list>
+#include <optional>
 #include <string>
 
 #include "items.h"
@@ -18,6 +20,9 @@ public:
     // bool operator<(const Item& other) const override;
     bool operator==(const appointment& other) const;
     bool operator<(const appointment& other) const;
+
+    static std::optional<std::tm> parseDateTime(const std::string& dateTime);
+    static std::optional<std::tm> parseDateTime(const std::string& date, const std::string& time);
 
 private:
     std::string time_point_to_string(const std::chrono::system_clock::time_point& tp) const;
@@ -42,8 +47,8 @@ public:
     void add(std::chrono::system_clock::time_point timeDate, int clientIndex, std::string note = "");
     void remove(appointment elem);
     void remove(std::chrono::system_clock::time_point timeDate, int clientIndex);
-    std::list<appointment> searchFrom(std::chrono::system_clock::time_point timeDate);
-    std::list<appointment> searchTo(std::chrono::system_clock::time_point timeDate);
+    std::list<appointment> searchFrom(std::chrono::system_clock::time_point timeDate, int clientId);
+    std::list<appointment> searchTo(std::chrono::system_clock::time_point timeDate, int clientId);
     std::list<appointment> searchClient(int clientIndex);
     // appointment search(std::chrono::system_clock::time_point timeDate);
 
