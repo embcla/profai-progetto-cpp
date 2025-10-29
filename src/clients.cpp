@@ -71,8 +71,7 @@ bool clientList::add(client clnt) {
 
 bool clientList::add(std::string nome, std::string cognome) {
     client clnt(nome, cognome);
-    ItemList<client>::add(clnt);
-    return true;
+    return (ItemList<client>::add(clnt));
 }
 
 bool clientList::modify(client &clnt, std::string nome, std::string cognome) {
