@@ -459,9 +459,9 @@ void CLI::searchAppointments(const client clnt) {
     if(!validateTimeDateInput(date, "00:00:00", asTimeT)) return;
 
     if ( val == 1 ) {
-        printElemList(_appointments.searchTo(std::chrono::system_clock::from_time_t(asTimeT), clnt.getId()));
-    } else if ( val == 2 ) {
         printElemList(_appointments.searchFrom(std::chrono::system_clock::from_time_t(asTimeT), clnt.getId()));
+    } else if ( val == 2 ) {
+        printElemList(_appointments.searchTo(std::chrono::system_clock::from_time_t(asTimeT), clnt.getId()));
     }
 
 }
